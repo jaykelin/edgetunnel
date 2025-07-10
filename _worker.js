@@ -181,7 +181,7 @@ export default {
                 if (路径 == '/') {
                     if (env.URL302) return Response.redirect(env.URL302, 302);
                     else if (env.URL) return await 代理URL(env.URL, url);
-                    else await handleDecoyRequest(request);
+                    else return await handleDecoyRequest(request);
                     // else return new Response(JSON.stringify(request.cf, null, 4), {
                     //     status: 200,
                     //     headers: {
