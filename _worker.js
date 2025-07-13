@@ -49,28 +49,6 @@ let link = [];
 let banHosts = [atob('c3BlZWQuY2xvdWRmbGFyZS5jb20=')];
 let SCV = 'true';
 let allowInsecure = '&allowInsecure=1';
-async function handleDecoyRequest(request) {
-    // 这里我们选择反向代理到 V2EX，你也可以换成任何其他网站
-    // 比如：'https://www.wikipedia.org', 'https://www.bing.com', 'https://blog.cloudflare.com'
-    const decoyHost = 'www.bing.com';
-    const url = new URL(request.url);
-    url.hostname = decoyHost;
-    url.protocol = 'https';
-
-    const newRequest = new Request(url, {
-        headers: request.headers,
-        method: request.method,
-        body: request.body,
-        redirect: 'follow'
-    });
-
-    // 为了避免目标网站识别出我们是代理，可以修改或删除一些头信息
-    newRequest.headers.set('Host', decoyHost);
-    newRequest.headers.set('Referer', `https://{decoyHost}/`);
-    newRequest.headers.delete('X-Forwarded-For');
-    
-    return await fetch(newRequest);
-}
 export default {
     async fetch(request, env, ctx) {
         try {
@@ -181,13 +159,12 @@ export default {
                 if (路径 == '/') {
                     if (env.URL302) return Response.redirect(env.URL302, 302);
                     else if (env.URL) return await 代理URL(env.URL, url);
-                    else return await handleDecoyRequest(request);
-                    // else return new Response(JSON.stringify(request.cf, null, 4), {
-                    //     status: 200,
-                    //     headers: {
-                    //         'content-type': 'application/json',
-                    //     },
-                    // });
+                    else return new Response(JSON.stringify(request.cf, null, 4), {
+                        status: 200,
+                        headers: {
+                            'content-type': 'application/json',
+                        },
+                    });
                 } else if (路径 == `/${fakeUserID}`) {
                     const fakeConfig = await 生成配置信息(userID, request.headers.get('Host'), sub, 'CF-Workers-SUB', RproxyIP, url, fakeUserID, fakeHostName, env);
                     return new Response(`${fakeConfig}`, { status: 200 });
